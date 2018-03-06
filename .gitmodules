@@ -1,0 +1,3 @@
+[submodule "WMHRedPacket"]
+	path = WMHRedPacket
+	url = https://github.com/hyzazurecs/WMHRedPacket.git
