@@ -1,54 +1,29 @@
-// pages/test/test.js
-
-const app = getApp();
-
+// pages/share/share.js
+var app = getApp();
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    info: "1",
-    qr: ""
+    userInfo:[],
+    houBaoStyle:1,
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
-    const ctx = wx.createCanvasContext('myCanvas')
-    ctx.setFillStyle('red')
-    ctx.fillRect(10, 10, 150, 75)
-    ctx.draw()
-
-    let thisinfo = options.info;
-    this.setData({
-      info: thisinfo
-    })
-
-
-    var that =this;
-    wx.request({
-      url: 'https://api.weixin.qq.com/wxa/getwxacode?access_token=' + app.globalData.access_token,
-      method: "POST",
-      data: {
-        path: "pages/test/test?info='scanQrCode'"
-      },
-      success: function(res){
-        let image_src= res.data;
-        console.log(image_src);
-        let qqr = "data:image/png;base64," + image_src;
-        that.setData({
-          qr: "data:image/png;base64," + image_src
-        })
-
-        ctx.drawImage(image_src)
-        ctx.draw()
-      }
+    var that  = this;
+    console.log(options);
+    that.setData({
+      houBaoStyle: options.houBaoStyle,
+      userInfo: app.globalData.userInfo,
     })
   },
-
+  toshareChat:function(){
+    
+  },
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
@@ -95,6 +70,6 @@ Page({
    * 用户点击右上角分享
    */
   onShareAppMessage: function () {
-  
+    
   }
 })

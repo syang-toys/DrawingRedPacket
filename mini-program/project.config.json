@@ -9,9 +9,8 @@
 	},
 	"compileType": "miniprogram",
 	"libVersion": "1.9.91",
-	"appid": "wx451ae423e4764593",
-	"projectname": "Wechat_app",
-	"isGameTourist": false,
+	"appid": "wx7475001116eabd77",
+	"projectname": "DrawingRedPacket",
 	"condition": {
 		"search": {
 			"current": -1,
@@ -19,10 +18,6 @@
 		},
 		"conversation": {
 			"current": -1,
-			"list": []
-		},
-		"game": {
-			"currentL": -1,
 			"list": []
 		},
 		"miniprogram": {

@@ -1,17 +1,41 @@
+const AV = require('./lib/av-weapp-min.js');
+const config = require('./config.js');
+const language = require('./utils/language.js');
+
+AV.init({
+  appId: config.appId,
+  appKey: config.appKey,
+  region: 'us'
+});
+
 //app.js
 App({
+  onLoad: function () {
+    console.log("App onLoad");
+  },
   onLaunch: function () {
-    // 展示本地存储能力
-    var logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
-
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
+    const that = this;
+    const systemInfo = wx.getSystemInfoSync();
+    if (systemInfo.language == 'zh_CN') {
+      this.globalData.language = language.zh;
+    } else {
+      this.globalData.language = language.en;
+    }
+    that.globalData.systemInfo = systemInfo;
+    wx.getUserInfo({
+      success: function (user) {
+        that.globalData.userInfo = user.userInfo
       }
     })
+    // 展示本地存储能力
+    const logs = wx.getStorageSync('logs') || []
+    logs.unshift(Date.now())
+    wx.setStorageSync('logs', logs)
+    // leancloud
+    AV.User.loginWithWeapp().then(user => {
+      that.globalData.attributes = user.attributes;
+    });
+
     // 获取用户信息
     wx.getSetting({
       success: res => {
@@ -34,8 +58,17 @@ App({
     })
   },
   globalData: {
-    userInfo: null,
-    access_token: null,
-    
-  }
+    userInfo: [],
+    language: null,
+    systemInfo: null
+  },
+  // 登录
+  login: function () {
+    wx.login({
+      success: res => {
+        // 发送 res.code 到后台换取 openId, sessionKey, unionId
+        console.log(res)
+      }
+    })
+  },
 })

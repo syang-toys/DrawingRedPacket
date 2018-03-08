@@ -104,18 +104,22 @@ AV.Cloud.define('queryRedPacket', async (request) => {
     } = request.params;
     try {
         const user = findUser(u_id);
-        if (p_id in user.p_ids) {
+        if (p_id in user.sp_ids) {
             ret.owner = true;
             ret.display = false;
         } else {
             ret.owner = false;
-            ret.display = true;            
+            ret.display = true;
         }
         const packet = findRedPacket(p_id);
-        for (let answer of packet.answers) {
-            if (answer.u_id === u_id) {
-                ret.display = false;                
-                break;
+        if (packet.get('amount') === 0) {
+            ret.display = false;
+        } else {
+            for (let answer of packet.answers) {
+                if (answer.u_id === u_id) {
+                    ret.display = false;
+                    break;
+                }
             }
         }
         ret.packet = packet;
@@ -148,7 +152,9 @@ AV.Cloud.define('newRedPacket', async (request) => {
     packet.set('num', num);
     packet.set('title', title);
     packet.set('answers', []);
-    user.add('p_ids', p_id);
+    user.add('sp_ids', p_id);
+    user.increment('sAmount', amount);
+    user.increment('sNum', 1);
     await Promise.all([
         packet.save(),
         user.save()
@@ -177,7 +183,10 @@ AV.Cloud.define('newAnswer', async (request) => {
             similarity: similarity
         }
         packet.add('answers', ans);
-        packet.fetchWhenSave(true)        
+        packet.fetchWhenSave(true);
+        user.add('rp_ids', p_id);
+        user.increment('rAmount', amount);
+        user.increment('rNum', 1);
         const ret = await Promise.all([
             modifyAmount(user, deliverAmount, false),
             packet.save()
@@ -189,4 +198,27 @@ AV.Cloud.define('newAnswer', async (request) => {
 
     await model.save();
     return status;
+});
+
+AV.Cloud.define('fetchUser', async (request) => {
+    const {
+        u_id
+    } = request.params;
+    let user;
+    try {
+        user = await findUser(u_id);
+    } catch (err) {
+        const UserModel = AV.Object.extend('UserModel');
+        user = new UserModel();
+        user.set('u_id', u_id);
+        user.set('amount', 1000);
+        user.set('rp_ids', []);
+        user.set('sp_ids', []);
+        user.set('rAmount', 0);
+        user.set('rNum', 0);
+        user.set('sAmount', 0);
+        user.set('sNum', 0);
+        await user.save();
+    }
+    return user;
 });
