@@ -1,10 +1,10 @@
 {
   "pages": [
     "pages/index/index",    
+    "pages/packet/packet",    
     "pages/mine/mine",    
     "pages/draw/draw",  
-    "pages/share/share",
-    "pages/packet/packet"    
+    "pages/share/share"
   ],
   "window": {
     "backgroundTextStyle": "light",

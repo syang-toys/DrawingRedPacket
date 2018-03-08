@@ -1,18 +1,18 @@
 // pages/draw/draw.js
-
 const { Cloud } = require('../../lib/av-weapp-min.js')
 const template = require('../../stencils.js')
 
-const app = getApp()
+var app = getApp()
 
 var pageData = {
   canvasId: 'draw-canvas',
   width: 0,
   height: 0,
-  recommends: null
+  recommends: null,
+  description: ''
 }
 
-let stencils = null
+let stencils = null;
 
 var arrayX = []
 var arrayY = []
@@ -27,12 +27,11 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
     // get stencils
     if (app.globalData.stencils) {
-      stencils = app.globalData.stencils
+      stencils = app.globalData.stencils;
     } else {
-      stencils = template
+      stencils = template;
     }
   },
 
@@ -56,7 +55,7 @@ Page({
       height: app.globalData.systemInfo.windowHeight
     })
 
-    this.context = wx.createCanvasContext(this.data.canvasId)
+    this.context = wx.createCanvasContext(this.data.canvasId);
   },
 
   /**
@@ -65,7 +64,10 @@ Page({
   onShareAppMessage: function () {
 
   },
+
+  //
   touchStart: function (e) {
+
     this.startX = e.changedTouches[0].x
     this.startY = e.changedTouches[0].y
     this.context.setStrokeStyle('#212121')
@@ -79,16 +81,17 @@ Page({
   },
 
   touchMove: function (e) {
+
     var curX = e.changedTouches[0].x
     var curY = e.changedTouches[0].y
 
     arrayX.push(curX)
     arrayY.push(curY)
-    arrayTime.push(float2int(e.timeStamp))
+    arrayTime.push(float2int(e.timeStamp));
 
-    this.context.moveTo(this.startX, this.startY)
-    this.context.lineTo(curX, curY)
-    this.context.stroke()
+    this.context.moveTo(this.startX, this.startY);
+    this.context.lineTo(curX, curY);
+    this.context.stroke();
 
     this.startX = curX;
     this.startY = curY;
@@ -110,18 +113,19 @@ Page({
       }]
     }
 
-    var that = this
+    var that = this;
 
     Cloud.run('matchDraw', options).then(function (res) {
-      console.log(res[0])
       // const array = JSON.parse(res)
       const flag = res[0]
-      
+        
       if (flag == 'SUCCESS') {
         const inks = res[1][0][1]
-        console.log(inks)
+        that.setData({
+          description: inks
+        })
         const ress = achievePath(inks)
-        const results = ress.slice(0,9)
+        const results = ress.slice(0,6)
         console.log(results)
         that.setData({
           recommends: results
@@ -166,7 +170,7 @@ Page({
   handleDeleteTap: function (e) {
     this.setData({
       recommends: null
-    })
+    });
 
     this.context.clearRect(0, 0, this.data.width, this.data.height)
     this.context.draw()
@@ -176,44 +180,67 @@ Page({
     arrayTime = []
   },
 
-  ls: function (e) {
+  chooseSvg: function (e) {
     this.context.clearRect(0, 0, this.data.width, this.data.height)
-    console.log(e.target.id)
-    this.context.draw()
+    this.context.draw();
     this.context.drawImage(e.target.id,0,0,200,200)
-    console.log("a")
 
     arrayX = []
     arrayY = []
     arrayTime = []
+
+    const options = app.globalData.options;
+    options.src = e.target.id;
+    options.u_id = app.globalData.attributes.username;
+    options.avatar = app.globalData.userInfo.avatarUrl;
+    options.description = this.data.description;
+    Cloud.run('newRedPacket', options).then((response)=>{
+        console.log(response);
+        const p_id = response.p_id;
+        wx.navigateTo({
+          url: `../packet/packet?p_id=${p_id}`
+        });
+    });
   }
 
 })
+
+
 
 function float2int(value) {
   return value | 0
 }
 
 function achievePath(inks) {
-  const keys = Object.keys(stencils);
-  const params = [];
+
+  const keys = Object.keys(stencils)
+  const params = []
+
   for (const i in inks) { // 遍历机器学习返回的单词
-    const item = inks[i];
+    const item = inks[i]
+
     for (const j in keys) {
-      const key = keys[j];
+
+      const key = keys[j]
       if (key.indexOf(item) !== -1) { // 返回的单词与模板单词进行匹配
-        const array = stencils[key];
+
+        const array = stencils[key]
+
         for (const k in array) { // 取出匹配成功的 src
-          const info = array[k];
+          const info = array[k]
+
           const result = {
             title: key,
             src: info.src,
             collection: info.collection
           }
-          params.push(result);
+
+          params.push(result)
         }
       }
     }
+
   }
-  return params;
+
+  return params
 }

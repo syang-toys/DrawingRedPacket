@@ -14,7 +14,7 @@
         </view>
   </view>
 
-  <canvas style="width: {{width}}px; height: {{height - 175 }}px" canvas-id="{{canvasId}}" class="canvas" disable-scroll="true" 
+  <canvas style="width: {{width}}px; height: {{height - 120 }}px" canvas-id="{{canvasId}}" class="canvas" disable-scroll="true" 
     bindtouchstart="touchStart" 
     bindtouchmove="touchMove"
     bindtouchend="touchEnd"/>

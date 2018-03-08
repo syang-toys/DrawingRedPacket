@@ -103,19 +103,20 @@ AV.Cloud.define('queryRedPacket', async (request) => {
         u_id
     } = request.params;
     try {
-        const user = findUser(u_id);
-        if (p_id in user.sp_ids) {
+        const user = await findUser(u_id);
+        const ret = {};
+        if (p_id in user.get('sp_ids')) {
             ret.owner = true;
             ret.display = false;
         } else {
             ret.owner = false;
             ret.display = true;
         }
-        const packet = findRedPacket(p_id);
-        if (packet.get('amount') === 0) {
+        const packet = await findRedPacket(p_id);
+        if (packet.get('leftAmount') === 0) {
             ret.display = false;
         } else {
-            for (let answer of packet.answers) {
+            for (let answer of packet.get('answers')) {
                 if (answer.u_id === u_id) {
                     ret.display = false;
                     break;
@@ -123,22 +124,27 @@ AV.Cloud.define('queryRedPacket', async (request) => {
             }
         }
         ret.packet = packet;
+        return ret;        
     } catch (err) {
         throw err;
     }
-    return ret;
 });
 
 AV.Cloud.define('newRedPacket', async (request) => {
-    const {
+    let {
         u_id,
+        avatar,
+        username,
         amount,
         num,
-        title
+        title,
+        description
     } = request.params;
     let user;
+    amount = parseInt(amount);
+    num = parseInt(num);
     try {
-        user = findUser();
+        user = await findUser(u_id);
         modifyAmount(user, -amount, true);
     } catch (err) {
         throw err;
@@ -147,9 +153,13 @@ AV.Cloud.define('newRedPacket', async (request) => {
     const RedPacket = AV.Object.extend('RedPacket');
     const packet = new RedPacket();
     packet.set('p_id', p_id);
+    packet.set('avatar', avatar);
+    packet.set('username', username);
     packet.set('description', description);
     packet.set('amount', amount);
+    packet.set('leftAmount', amount);
     packet.set('num', num);
+    packet.set('leftNum', num);
     packet.set('title', title);
     packet.set('answers', []);
     user.add('sp_ids', p_id);
@@ -166,7 +176,9 @@ AV.Cloud.define('newAnswer', async (request) => {
     const {
         p_id,
         u_id,
-        answer
+        answer,
+        avatar,
+        username
     } = request.params;
     try {
         const packet = await findRedPacket(p_id);
@@ -176,11 +188,14 @@ AV.Cloud.define('newAnswer', async (request) => {
             throw new AV.Cloud.Error('No similarity!');
         }
         const user = await findUser(u_id);
-        packet.increment('amount', -amount);
-        packet.increment('num', -1);
+        packet.increment('leftAmount', -amount);
+        packet.increment('leftNum', -1);
         const ans = {
             u_id: u_id,
-            similarity: similarity
+            similarity: similarity,
+            avatar: avatar,
+            username: username,
+            amount: deliverAmount
         }
         packet.add('answers', ans);
         packet.fetchWhenSave(true);

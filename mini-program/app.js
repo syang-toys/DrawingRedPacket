@@ -24,7 +24,7 @@ App({
     that.globalData.systemInfo = systemInfo;
     wx.getUserInfo({
       success: function (user) {
-        that.globalData.userInfo = user.userInfo
+        that.globalData.userInfo = user.userInfo;
       }
     })
     // 展示本地存储能力
@@ -34,6 +34,10 @@ App({
     // leancloud
     AV.User.loginWithWeapp().then(user => {
       that.globalData.attributes = user.attributes;
+    });
+
+    AV.Cloud.run('fetchUser', {u_id: u_id}).then((response)=>{
+      console.log(response);
     });
 
     // 获取用户信息
@@ -60,7 +64,8 @@ App({
   globalData: {
     userInfo: [],
     language: null,
-    systemInfo: null
+    systemInfo: null,
+    attributes: []
   },
   // 登录
   login: function () {
