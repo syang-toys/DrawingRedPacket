@@ -24,8 +24,20 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 1,
+			"current": -1,
 			"list": [
+				{
+					"id": 0,
+					"name": "packet",
+					"pathName": "pages/packet/packet",
+					"query": "p_id=17"
+				},
+				{
+					"id": -1,
+					"name": "mine",
+					"pathName": "pages/mine/mine",
+					"query": ""
+				},
 				{
 					"id": -1,
 					"name": "packet",
@@ -34,9 +46,9 @@
 				},
 				{
 					"id": -1,
-					"name": "mine",
-					"pathName": "pages/mine/mine",
-					"query": ""
+					"name": "packet",
+					"pathName": "pages/packet/packet",
+					"query": "p_id=45"
 				}
 			]
 		}

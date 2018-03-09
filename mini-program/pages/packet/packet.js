@@ -8,6 +8,8 @@ Page({
    * 页面的初始数据
    */
   data: {
+    owner: false,
+    display: true,
     p_id: 0,
     userInfo:[],
     username: '辉哥哥',
@@ -18,7 +20,8 @@ Page({
     leftAmount: 0,
     title: 'Hello World!',
     answer: [],
-    src: '../image/mine-1.png'
+    src: '../image/mine-1.png',
+    u_id: 0
   },
 
   /**
@@ -36,16 +39,20 @@ Page({
       Cloud.run('queryRedPacket', {p_id: p_id, u_id: u_id}).then((response)=>{
         let packet = response.packet;
         that.setData({
+          u_id: u_id,
+          owner: response.owner,
+          display: response.display,
           amount: packet.amount,
           num: packet.num,
           leftNum: packet.leftNum,
           leftAmount: packet.leftAmount,
           titie: packet.title,
-          answer: packet.answer,
+          answer: packet.answers,
           avatar: packet.avatar,
           username: packet.username,
           src: packet.src
         })
+        console.log(response.display);
       });
     });
   },
@@ -111,6 +118,13 @@ Page({
     const that = this;
     wx.navigateTo({
       url: `../share/share?p_id${that.data.p_id}&src=${that.data.src}`
+    });
+  },
+
+  toCompete: function () {
+    const that = this;
+    wx.navigateTo({
+      url: `../compete/compete?u_id=${that.data.u_id}&p_id=${that.data.p_id}&imgSrc=${that.data.src}`,
     });
   }
 })

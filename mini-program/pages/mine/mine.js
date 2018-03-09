@@ -38,9 +38,7 @@ Page({
             sp_ids: sp_ids,
             userInfo:app.globalData.userInfo,
           });
-          console.log(rp_ids);
-          console.log(sp_ids);
-          AV.Cloud.run('myRcvRedPacket', {rp_ids: rp_ids}).then((response)=>{
+          AV.Cloud.run('myRcvRedPacket', {rp_ids: rp_ids, u_id: u_id}).then((response)=>{
             that.setData({
               rPacket: response
             })

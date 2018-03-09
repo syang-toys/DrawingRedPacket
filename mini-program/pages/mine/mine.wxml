@@ -32,10 +32,10 @@
           <image src="{{item.src}}" mode='widthFix' class='people_header fl'></image>      
           <view class='people'>
             <view class='fl'>{{item.title}}</view>
-            <view class='fr'>{{0-item.leftAmount}}/{{item.amount}}</view>
+            <view class='fr'>{{item.leftAmount}}/{{item.amount}}</view>
           </view>       
           <view class='time'>
-            <view class='fr'>{{0-item.leftNum}}/{{item.num}}</view>
+            <view class='fr'>{{item.leftNum}}/{{item.num}}</view>
           </view>
         </view>
       </view>
@@ -52,7 +52,6 @@
             </view>       
             <view class='time2'>
               <view class='fl'>similarity: {{item.similarity}}</view>
-              <view class='fr'>num: {{item.num}}</view>
             </view>
           </view>
         </view>
