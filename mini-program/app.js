@@ -34,11 +34,13 @@ App({
     // leancloud
     AV.User.loginWithWeapp().then(user => {
       that.globalData.attributes = user.attributes;
+      let u_id = user.attributes.username;
+      AV.Cloud.run('fetchUser', { u_id: u_id }).then((response) => {
+        console.log(response);
+      });
     });
 
-    AV.Cloud.run('fetchUser', {u_id: u_id}).then((response)=>{
-      console.log(response);
-    });
+    
 
     // 获取用户信息
     wx.getSetting({

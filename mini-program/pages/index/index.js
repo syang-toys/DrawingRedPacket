@@ -7,8 +7,8 @@ Page({
     userInfo: [],
     description: '小伙伴们将会根据图片的相似度来领取红包哟',
     title: 'Hello World',
-    money: '10',
-    num: '10',
+    money: 10,
+    num: 10,
     answer: '',
   },
   onLoad: function () {
@@ -37,7 +37,7 @@ Page({
   NumberInput: function (e) {
     const that = this;
     that.setData({
-      num: e.detail.value,
+      num: e.detail.value
     });
   },
   jubenAnswerInput: function (e) {

@@ -8,6 +8,7 @@ Page({
    * 页面的初始数据
    */
   data: {
+    p_id: 0,
     userInfo:[],
     username: '辉哥哥',
     avatar: '../image/mine-1.png',
@@ -16,7 +17,8 @@ Page({
     leftNum: 0,
     leftAmount: 0,
     title: 'Hello World!',
-    answer: []
+    answer: [],
+    src: '../image/mine-1.png'
   },
 
   /**
@@ -24,10 +26,11 @@ Page({
    */
   onLoad: function (options) {
     const that = this;
+    const p_id = parseInt(options['p_id']);    
     that.setData({
-      userInfo: app.globalData.userInfo
+      userInfo: app.globalData.userInfo,
+      p_id: p_id
     });
-    const p_id = parseInt(options['p_id']);
     User.loginWithWeapp().then((user) => {
       const u_id = user.attributes.username;
       Cloud.run('queryRedPacket', {p_id: p_id, u_id: u_id}).then((response)=>{
@@ -40,7 +43,8 @@ Page({
           titie: packet.title,
           answer: packet.answer,
           avatar: packet.avatar,
-          username: packet.username
+          username: packet.username,
+          src: packet.src
         })
       });
     });
@@ -100,6 +104,13 @@ Page({
   toMine: function () {
     wx.switchTab({
       url: '../mine/mine'
+    });
+  },
+
+  wantShare: function () {
+    const that = this;
+    wx.navigateTo({
+      url: `../share/share?p_id${that.data.p_id}&src=${that.data.src}`
     });
   }
 })

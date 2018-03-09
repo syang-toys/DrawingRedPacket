@@ -192,11 +192,11 @@ Page({
     const options = app.globalData.options;
     options.src = e.target.id;
     options.u_id = app.globalData.attributes.username;
+    options.username = app.globalData.userInfo.nickName;
     options.avatar = app.globalData.userInfo.avatarUrl;
     options.description = this.data.description;
     Cloud.run('newRedPacket', options).then((response)=>{
-        console.log(response);
-        const p_id = response.p_id;
+        const p_id = response;
         wx.navigateTo({
           url: `../packet/packet?p_id=${p_id}`
         });
