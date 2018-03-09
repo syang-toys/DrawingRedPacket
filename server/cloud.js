@@ -12,13 +12,13 @@ async function fetchGlobalStatus() {
 
 function deliverRedPacket(similarity, amount, num) {
     if (similarity < 0.5) {
-        return 0;
+        return similarity;
     } else if (num === 1) {
         return amount;
     } else {
         const times = Math.random() + 0.499999 + similarity / 2;
         const deliverAmount = amount * times / num;
-        return deliverAmount.toFixed(2);
+        return parseFloat(deliverAmount.toFixed(2));
     }
 }
 
@@ -51,6 +51,7 @@ async function modifyAmount(user, amount, needCheck) {
             });
         } else {
             await user.save();
+            return;
         }
     } catch (err) {
         if (err.code === 305) {
@@ -124,7 +125,7 @@ AV.Cloud.define('queryRedPacket', async (request) => {
             }
         }
         ret.packet = packet;
-        return ret;        
+        return ret;
     } catch (err) {
         throw err;
     }
@@ -137,6 +138,7 @@ AV.Cloud.define('newRedPacket', async (request) => {
         username,
         amount,
         num,
+        src,
         title,
         description
     } = request.params;
@@ -161,6 +163,7 @@ AV.Cloud.define('newRedPacket', async (request) => {
     packet.set('num', num);
     packet.set('leftNum', num);
     packet.set('title', title);
+    packet.set('src', src);
     packet.set('answers', []);
     user.add('sp_ids', p_id);
     user.increment('sAmount', amount);
@@ -183,12 +186,13 @@ AV.Cloud.define('newAnswer', async (request) => {
     try {
         const packet = await findRedPacket(p_id);
         const similarity = compareAnswer(packet.get('description'), answer);
-        const deliverAmount = deliverRedPacket(similarity, packet.get('amount'), packet.get('num'));
+        let deliverAmount = deliverRedPacket(similarity, packet.get('amount'), packet.get('num'));
         if (deliverAmount === 0) {
             throw new AV.Cloud.Error('No similarity!');
         }
         const user = await findUser(u_id);
-        packet.increment('leftAmount', -amount);
+        deliverAmount = parseFloat(deliverAmount);
+        packet.increment('leftAmount', -deliverAmount);
         packet.increment('leftNum', -1);
         const ans = {
             u_id: u_id,
@@ -198,21 +202,16 @@ AV.Cloud.define('newAnswer', async (request) => {
             amount: deliverAmount
         }
         packet.add('answers', ans);
-        packet.fetchWhenSave(true);
         user.add('rp_ids', p_id);
-        user.increment('rAmount', amount);
+        user.increment('rAmount', parseFloat(deliverAmount));
         user.increment('rNum', 1);
-        const ret = await Promise.all([
-            modifyAmount(user, deliverAmount, false),
-            packet.save()
-        ]);
-        return ret[0];
+        user.increment('amount', parseFloat(deliverAmount));
+        await user.save();
+        await packet.save();
+        return;
     } catch (err) {
         throw err;
     }
-
-    await model.save();
-    return status;
 });
 
 AV.Cloud.define('fetchUser', async (request) => {
@@ -236,4 +235,55 @@ AV.Cloud.define('fetchUser', async (request) => {
         await user.save();
     }
     return user;
+});
+
+AV.Cloud.define('myRcvRedPacket', async (request) => {
+    const {
+        rp_ids,
+        u_id
+    } = request.params;
+    const ret = [];
+    try {
+        for (let p_id of rp_ids) {
+            let packet = await findRedPacket(p_id);
+            const rPacket = {};
+            const keys = ['src', 'amount', 'title', 'username'];
+            for (let key of keys) {
+                rPacket[key] = packet.get(key);
+            }
+            const answers = packet.get('answers');
+            for (let ans of answers) {
+                if (ans.u_id === u_id) {
+                    rPacket['similarity'] = ans['similarity'];
+                    rPacket['rAmount'] = ans['amount'];
+                    break;
+                }
+            }
+            ret.push(rPacket);
+        }
+    } catch (err) {
+        throw err;
+    }
+    return ret;
+});
+
+AV.Cloud.define('mySendRedPacket', async (request) => {
+    const {
+        sp_ids
+    } = request.params;
+    const ret = []
+    try {
+        for (let p_id of sp_ids) {
+            let packet = await findRedPacket(p_id);
+            const keys = ['src', 'amount', 'num', 'title', 'leftAmount', 'leftNum'];
+            let sPacket = {};
+            for (let key of keys) {
+                sPacket[key] = packet.get(key);
+            }
+            ret.push(sPacket);
+        }
+    } catch (err) {
+        throw err;
+    }
+    return ret;
 });

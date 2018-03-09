@@ -1,6 +1,8 @@
 # DrawingRedPacket
 
-A wechat mini program for our school competition
+A Wechat mini-program using Google AutoDraw API
+
+Having fun wite redpacket and drawing!
 
 ## Catalog
 
