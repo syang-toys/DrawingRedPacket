@@ -21,5 +21,5 @@
 
 ## 参考
 
-[微信小程序 语音红包](https://github.com/Say-hi/wx-yuyinghongbao)
-[微信小程序版 AutoDraw](https://github.com/zhgqthomas/weapp-autodraw)
+- [微信小程序 语音红包](https://github.com/Say-hi/wx-yuyinghongbao)
+- [微信小程序版 AutoDraw](https://github.com/zhgqthomas/weapp-autodraw)
